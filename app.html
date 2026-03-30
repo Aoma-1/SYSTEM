@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIMROD AOMA Electronic Tax Manager</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Comprehensive electronic tax management system for tracking payments, confirmations, and user data">
+    <meta name="theme-color" content="#0077cc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Tax Manager">
+    <meta name="msapplication-TileColor" content="#0077cc">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    
+    <!-- Manifest and Icons -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/jpeg" sizes="192x192" href="/tax-money.jpg">
+    <link rel="icon" type="image/jpeg" sizes="512x512" href="/tax-money.jpg">
+    <link rel="apple-touch-icon" href="/tax-money.jpg">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mobile-app.css">
+    <style>
+        /* Mobile App Specific Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #0077cc 0%, #005fa3 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px 8px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: #6c757d;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .nav-tab.active {
+            background: #0077cc;
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+
+        .nav-tab.active:hover {
+            background: #0077cc;
+        }
+
+        .content-section {
+            display: none;
+            padding: 20px;
+            min-height: calc(100vh - 200px);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .welcome-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .welcome-section img {
+            width: 80%;
+            max-width: 300px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 20px 0;
+        }
+
+        .welcome-section p {
+            color: #666;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0077cc 0%, #005fa3 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.4);
+        }
+
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0077cc;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .dashboard-card h3 {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-card i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-container th,
+        .table-container td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .table-container th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .location-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .location-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .location-data {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .location-data p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .app-footer {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+            border-top: 1px solid #dee2e6;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0077cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .nav-tab {
+                font-size: 0.7rem;
+                padding: 10px 6px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .content-section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- App Header -->
+        <div class="app-header">
+            <h1>NIMROD AOMA</h1>
+            <p>Electronic Tax Manager</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('home')">🏠 Home</button>
+            <button class="nav-tab" onclick="showSection('login')">🔐 Login</button>
+            <button class="nav-tab" onclick="showSection('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="showSection('tax-payment')">💰 Tax Payment</button>
+            <button class="nav-tab" onclick="showSection('confirmation')">✅ Confirmation</button>
+            <button class="nav-tab" onclick="showSection('location')">📍 Location</button>
+            <button class="nav-tab" onclick="showSection('userdata')">👤 Profile</button>
+            <button class="nav-tab" onclick="showSection('settings')">⚙️ Settings</button>
+        </div>
+
+        <!-- Home Section -->
+        <div id="home" class="content-section active">
+            <div class="welcome-section">
+                <h2 class="section-title">Welcome to Electronic Tax Manager</h2>
+                <img src="tax-money.jpg" alt="Tax & Money Management">
+                <p>Your comprehensive solution for managing taxes, tracking payments, and organizing your financial data with ease.</p>
+                <button class="btn-primary" onclick="showSection('dashboard')">Get Started</button>
+            </div>
+        </div>
+
+        <!-- Login Section -->
+        <div id="login" class="content-section">
+            <h2 class="section-title">Login</h2>
+            <div class="form-container">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username">Username or Email</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Login</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section">
+            <h2 class="section-title">Dashboard</h2>
+            <div class="dashboard-grid">
+                <div class="dashboard-card" onclick="showSection('tax-payment')">
+                    <h3>Tax Payment</h3>
+                    <div>💰</div>
+                </div>
+                <div class="dashboard-card" onclick="showSection('confirmation')">
+                    <h3>Confirmation Numbers</h3>
+                    <div>✅</div>
+                </div>
+                <div class="dashboard-card" onclick="showSection('location')">
+                    <h3>Location Tracking</h3>
+                    <div>📍</div>
+                </div>
+                <div class="dashboard-card" onclick="showSection('userdata')">
+                    <h3>User Profile</h3>
+                    <div>👤</div>
+                </div>
+                <div class="dashboard-card" onclick="showSection('settings')">
+                    <h3>Settings</h3>
+                    <div>⚙️</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tax Payment Section -->
+        <div id="tax-payment" class="content-section">
+            <h2 class="section-title">Tax Payment</h2>
+            <div class="form-container">
+                <form id="tax-payment-form">
+                    <div class="form-group">
+                        <label for="tax-amount">Amount in KSH</label>
+                        <input type="number" id="tax-amount" name="amount" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="tax-type">Tax Type</label>
+                        <select id="tax-type" name="tax-type" required>
+                            <option value="">Select Tax Type</option>
+                            <option value="income">Income Tax</option>
+                            <option value="vat">VAT</option>
+                            <option value="corporation">Corporation Tax</option>
+                            <option value="withholding">Withholding Tax</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-method">Payment Method</label>
+                        <select id="payment-method" name="payment-method" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="mpesa">M-Pesa</option>
+                            <option value="bank">Bank Transfer</option>
+                            <option value="card">Credit/Debit Card</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Pay Tax</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Confirmation Section -->
+        <div id="confirmation" class="content-section">
+            <h2 class="section-title">Confirmation Numbers</h2>
+            <div class="table-container">
+                <table id="confirmation-numbers">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Confirmation Number</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Location Tracking Section -->
+        <div id="location" class="content-section">
+            <h2 class="section-title">Location Tracking</h2>
+            <div class="location-card">
+                <h3>Current Location</h3>
+                <div id="location-data">
+                    <p>Getting your location...</p>
+                    <div class="loading"></div>
+                </div>
+                <button class="btn-primary" onclick="getLocation()">Refresh Location</button>
+            </div>
+        </div>
+
+        <!-- User Data Section -->
+        <div id="userdata" class="content-section">
+            <h2 class="section-title">User Profile & Data</h2>
+            <div class="form-container">
+                <form id="user-data-form">
+                    <div class="form-group">
+                        <label for="full-name">Full Name</label>
+                        <input type="text" id="full-name" name="full-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="kra-pin">KRA PIN</label>
+                        <input type="text" id="kra-pin" name="kra-pin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" id="address" name="address" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Save Profile</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings" class="content-section">
+            <h2 class="section-title">Settings</h2>
+            <div class="form-container">
+                <form id="settings-form">
+                    <div class="form-group">
+                        <label for="notifications">Enable Notifications</label>
+                        <select id="notifications" name="notifications">
+                            <option value="enabled">Enabled</option>
+                            <option value="disabled">Disabled</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="language">Language</label>
+                        <select id="language" name="language">
+                            <option value="en">English</option>
+                            <option value="sw">Swahili</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="currency">Currency</label>
+                        <select id="currency" name="currency">
+                            <option value="KES">Kenyan Shilling (KES)</option>
+                            <option value="USD">US Dollar (USD)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Save Settings</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- App Footer -->
+        <div class="app-footer">
+            <p>&copy; 2025 NIMROD AOMA Electronic Tax Manager</p>
+        </div>
+    </div>
+
+    <script src="mobile-app.js"></script>
+</body>
+</html> 
